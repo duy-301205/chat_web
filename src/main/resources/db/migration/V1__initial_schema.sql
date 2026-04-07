@@ -81,6 +81,12 @@ CREATE TABLE message_delivery (
                                   UNIQUE (message_id, user_id)
 );
 
+CREATE TABLE invalidated_tokens (
+                                    id VARCHAR(255) PRIMARY KEY,
+                                    expiry_time TIMESTAMP WITH TIME ZONE NOT NULL,
+                                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX idx_msgs_conv_id_id_desc ON messages (conversation_id, id DESC);
 CREATE INDEX idx_msgs_not_deleted ON messages (conversation_id, id DESC) WHERE is_deleted = FALSE;
 CREATE INDEX idx_conv_last_msg ON conversations (last_message_at DESC);
