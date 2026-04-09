@@ -11,9 +11,10 @@ import java.time.OffsetDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class MyProfileResponse {
 
     private Long id;
+    private String email;
     private String username;
     private String avatarUrl;
     private String status;

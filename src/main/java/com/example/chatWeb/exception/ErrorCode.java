@@ -15,6 +15,9 @@ public enum ErrorCode {
     USER_EXISTED(2004, "Tên người dùng đã tồn tại.", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(2005, "Email đã tồn tại.", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(2007, "Mật khẩu phải có ít nhất {min} ký tự.", HttpStatus.BAD_REQUEST),
+    EMAIL_REQUIRED(2008, "Email không hợp lệ.", HttpStatus.BAD_REQUEST),
+    USERNAME_REQUIRED(2009,"Username không hợp lệ", HttpStatus.BAD_REQUEST),
+    PASSWORD_REQUIRED(2010,"Password không hợp lệ", HttpStatus.BAD_REQUEST),
 
     // Chat & Conversation
     CONVERSATION_NOT_FOUND(3001, "Cuộc hội thoại không tồn tại.", HttpStatus.NOT_FOUND),

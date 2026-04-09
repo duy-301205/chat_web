@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
-
+@Builder
+public class AuthResponse {
     private Long id;
+    private String email;
     private String username;
     private String avatarUrl;
-    private String status;
-    private OffsetDateTime lastSeen;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

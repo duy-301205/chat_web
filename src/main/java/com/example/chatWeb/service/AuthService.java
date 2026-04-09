@@ -4,7 +4,7 @@ import com.example.chatWeb.dto.request.LoginRequest;
 import com.example.chatWeb.dto.request.RefreshTokenRequest;
 import com.example.chatWeb.dto.request.RegisterRequest;
 import com.example.chatWeb.dto.response.LoginResponse;
-import com.example.chatWeb.dto.response.UserResponse;
+import com.example.chatWeb.dto.response.AuthResponse;
 import com.example.chatWeb.entity.InvalidatedToken;
 import com.example.chatWeb.entity.User;
 import com.example.chatWeb.exception.AppException;
@@ -30,9 +30,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final InvalidedTokenRepository invalidedTokenRepository;
+    private final UserStatusService userStatusService;
 
     @Transactional
-    public UserResponse register(RegisterRequest registerRequest) {
+    public AuthResponse register(RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
@@ -53,7 +54,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        return UserResponse.builder()
+        return AuthResponse.builder()
                 .id(savedUser.getId())
                 .email(savedUser.getEmail())
                 .username(savedUser.getUsername())
@@ -70,6 +71,11 @@ public class AuthService {
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+
+        user.setLastSeen(OffsetDateTime.now());
+        userRepository.save(user);
+
+        userStatusService.updateStatus(user.getId(), "ONLINE");
 
         return LoginResponse.builder()
                 .accessToken(jwtService.generateAccessToken(user))
@@ -108,6 +114,14 @@ public class AuthService {
         if (token == null || token.isEmpty()) return;
 
         try {
+            String email = jwtService.extractEmail(token);
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+            userStatusService.updateStatus(user.getId(), "OFFLINE");
+            user.setLastSeen(OffsetDateTime.now());
+            userRepository.save(user);
+
             String tokenId = jwtService.extractId(token);
             Date expiryDate = jwtService.extractExpiration(token);
 

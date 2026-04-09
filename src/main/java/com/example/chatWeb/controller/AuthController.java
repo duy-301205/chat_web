@@ -5,7 +5,7 @@ import com.example.chatWeb.dto.request.RefreshTokenRequest;
 import com.example.chatWeb.dto.request.RegisterRequest;
 import com.example.chatWeb.dto.response.ApiResponse;
 import com.example.chatWeb.dto.response.LoginResponse;
-import com.example.chatWeb.dto.response.UserResponse;
+import com.example.chatWeb.dto.response.AuthResponse;
 import com.example.chatWeb.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +22,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ApiResponse<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ApiResponse.<UserResponse>builder()
+    public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ApiResponse.<AuthResponse>builder()
                 .data(authService.register(request))
                 .build();
     }
