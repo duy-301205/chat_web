@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "conversations")
@@ -30,6 +31,9 @@ public class Conversation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
+
+    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
+    private List<ConversationMember> members;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_message_id")

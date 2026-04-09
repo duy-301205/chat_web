@@ -22,7 +22,6 @@ public class UserStatusService {
         }
     }
 
-
     public String getStatus(Long userId) {
         String key = STATUS_PREFIX + userId;
         String val = stringRedisTemplate.opsForValue().get(key);
