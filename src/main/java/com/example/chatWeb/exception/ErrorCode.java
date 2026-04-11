@@ -26,6 +26,7 @@ public enum ErrorCode {
     ALREADY_A_MEMBER(3003, "Người dùng đã là thành viên của nhóm.", HttpStatus.BAD_REQUEST),
     ONLY_ADMIN_CAN_ACTION(3004, "Chỉ Quản trị viên mới có quyền thực hiện hành động này.", HttpStatus.FORBIDDEN),
     PRIVATE_CHAT_LIMIT(3005, "Chat cá nhân chỉ cho phép tối đa 2 người.", HttpStatus.BAD_REQUEST),
+    USER_NOT_IN_CONVERSATION(3006,"User không có trong cuộc trò chuyện" , HttpStatus.BAD_REQUEST),
 
     // Message & Delivery
     MESSAGE_NOT_FOUND(4001, "Tin nhắn không tồn tại.", HttpStatus.NOT_FOUND),

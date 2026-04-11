@@ -51,9 +51,16 @@ public class ConversationController {
     public ApiResponse<Void> removeMembers(@PathVariable Long id,
                                            @RequestBody RemoveMembersRequest request) {
         conversationService.removeMembersFromGroup(id, request);
-
         return ApiResponse.<Void>builder()
                 .message("Member removed successfully")
+                .build();
+    }
+
+    @PostMapping("/{id}/leave")
+    public ApiResponse<Void> leaveGroup(@PathVariable Long id) {
+        conversationService.leaveGroup(id);
+        return ApiResponse.<Void>builder()
+                .message("You left the conversation")
                 .build();
     }
 }

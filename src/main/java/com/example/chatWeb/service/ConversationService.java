@@ -38,6 +38,42 @@ public class ConversationService {
     private final EntityManager entityManager;
 
     @Transactional
+    public void leaveGroup(Long conversationId) {
+        Long currentId = getCurrentUser();
+
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+        if (conversation.getType() == ConvType.PRIVATE) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        ConversationMember me = conversationMemberRepository.findByConversationIdAndUserId(conversationId, currentId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_IN_CONVERSATION));
+
+        if(me.getRole() == MemberRole.ADMIN) {
+            handleAdminLeave(conversation, currentId);
+        }
+        conversationMemberRepository.delete(me);
+
+        conversation.getMembers().removeIf(m -> m.getUser().getId().equals(currentId));
+    }
+
+    private void handleAdminLeave(Conversation conversation, Long adminId) {
+        List<ConversationMember> otherMembers = conversation.getMembers().stream()
+                .filter(m -> !m.getUser().getId().equals(adminId))
+                .toList();
+
+        if(!otherMembers.isEmpty()) {
+            ConversationMember newAdmin = otherMembers.get(0);
+            newAdmin.setRole(MemberRole.ADMIN);
+            conversationMemberRepository.save(newAdmin);
+        } else {
+            conversationRepository.delete(conversation);
+        }
+    }
+
+    @Transactional
     public void removeMembersFromGroup(Long conversationId, RemoveMembersRequest request) {
         Long currentUserId = getCurrentUser();
 
