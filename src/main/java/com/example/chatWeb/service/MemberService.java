@@ -17,11 +17,15 @@ public class MemberService {
 
     @Transactional
     public void addMember(AddMemberRequest addMemberRequest) {
+        if(memberRepository.existsByConversationIdAndUserId(addMemberRequest.getConversation().getId(), addMemberRequest.getUser().getId())) {
+            return;
+        }
         ConversationMember member = new ConversationMember();
         member.setConversation(addMemberRequest.getConversation());
         member.setUser(addMemberRequest.getUser());
         member.setRole(addMemberRequest.getRole());
         member.setJoinedAt(OffsetDateTime.now());
+        member.setUpdatedAt(OffsetDateTime.now());
 
         memberRepository.save(member);
     }

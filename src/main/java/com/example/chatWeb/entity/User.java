@@ -45,6 +45,9 @@ public class User extends BaseEntity implements UserDetails {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
+    public String getActualUsername() {
+        return this.username;
+    }
     @Override
     public String getUsername() {
         return this.email;

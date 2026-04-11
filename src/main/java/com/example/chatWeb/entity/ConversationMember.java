@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.OffsetDateTime;
 
@@ -35,6 +37,7 @@ public class ConversationMember {
     private String nickname;
 
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private MemberRole role = MemberRole.MEMBER;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -57,7 +57,7 @@ public class AuthService {
         return AuthResponse.builder()
                 .id(savedUser.getId())
                 .email(savedUser.getEmail())
-                .username(savedUser.getUsername())
+                .username(savedUser.getActualUsername())
                 .avatarUrl(savedUser.getAvatarUrl())
                 .createdAt(savedUser.getCreatedAt())
                 .updatedAt(savedUser.getUpdatedAt())

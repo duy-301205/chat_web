@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -34,6 +36,7 @@ public class Message extends BaseEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     private MsgType type = MsgType.TEXT;
 
     @ManyToOne(fetch = FetchType.LAZY)

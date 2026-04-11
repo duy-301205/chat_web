@@ -25,10 +25,11 @@ CREATE TABLE conversations (
                                created_by BIGINT REFERENCES users(id),
                                last_message_id BIGINT,
                                last_message_at TIMESTAMP WITH TIME ZONE,
+                               avatar_url TEXT DEFAULT 'https://api.dicebear.com/7.x/identicon/svg?seed=group',
                                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                                CONSTRAINT check_private_name CHECK (
-                                   (type = 'PRIVATE' AND name IS NULL)
+                                   (type = 'PRIVATE' AND name IS NULL AND avatar_url IS NULL)
                                        OR (type = 'GROUP')
                                    )
 );

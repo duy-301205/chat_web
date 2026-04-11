@@ -6,8 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,6 +26,7 @@ public class Conversation extends BaseEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
     private ConvType type;
 
@@ -33,7 +37,7 @@ public class Conversation extends BaseEntity {
     private User createdBy;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
-    private List<ConversationMember> members;
+    private List<ConversationMember> members = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_message_id")
@@ -41,4 +45,7 @@ public class Conversation extends BaseEntity {
 
     @Column(name = "last_message_at")
     private OffsetDateTime lastMessageAt;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 }

@@ -27,4 +27,9 @@ public class UserStatusService {
         String val = stringRedisTemplate.opsForValue().get(key);
         return (val != null) ? "ONLINE" : "OFFLINE";
     }
+
+    public boolean isUserOnline(Long userId) {
+        String key = STATUS_PREFIX + userId;
+        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+    }
 }

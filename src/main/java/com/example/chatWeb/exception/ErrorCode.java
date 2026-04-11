@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     UNCATEGORIZED(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1000, "Uncategorized error key", HttpStatus.BAD_REQUEST),
+    INVALID_REQUEST(1001, "Uncategorized error request" , HttpStatus.BAD_REQUEST ),
 
     // Auth & User
     UNAUTHENTICATED(2001, "Xác thực thất bại, vui lòng đăng nhập lại.", HttpStatus.UNAUTHORIZED),
@@ -35,6 +36,7 @@ public enum ErrorCode {
     INVALID_FILE_FORMAT(5001, "Định dạng file không hỗ trợ.", HttpStatus.BAD_REQUEST),
     FILE_TOO_LARGE(5002, "Kích thước file vượt quá giới hạn.", HttpStatus.BAD_REQUEST),
     UPLOAD_FAILED(5003, "Tải file lên thất bại.", HttpStatus.INTERNAL_SERVER_ERROR);
+
 
     private final int code;
     private final String message;
