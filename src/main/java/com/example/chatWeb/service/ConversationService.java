@@ -3,6 +3,7 @@ package com.example.chatWeb.service;
 import com.example.chatWeb.dto.request.AddGroupMembersRequest;
 import com.example.chatWeb.dto.request.AddMemberRequest;
 import com.example.chatWeb.dto.request.CreateConversationRequest;
+import com.example.chatWeb.dto.request.RemoveMembersRequest;
 import com.example.chatWeb.dto.response.ConversationResponse;
 import com.example.chatWeb.dto.response.MemberResponse;
 import com.example.chatWeb.entity.Conversation;
@@ -35,6 +36,36 @@ public class ConversationService {
     private final ConversationMemberRepository conversationMemberRepository;
     private final MemberService memberService;
     private final EntityManager entityManager;
+
+    @Transactional
+    public void removeMembersFromGroup(Long conversationId, RemoveMembersRequest request) {
+        Long currentUserId = getCurrentUser();
+
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+        if (conversation.getType() == ConvType.PRIVATE) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        List<Long> targetIds = request.getUserIds().stream().distinct().toList();
+
+        for(Long targetId : targetIds) {
+            if(!isMember(conversation, targetId)) {
+                continue;
+            }
+
+            if(!currentUserId.equals(targetId)) {
+                ConversationMember member = conversationMemberRepository.findByConversationIdAndUserId(conversationId, currentUserId)
+                        .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+
+                if(member.getRole() != MemberRole.ADMIN) {
+                    throw new AppException(ErrorCode.UNAUTHORIZED);
+                }
+            }
+            conversationMemberRepository.deleteByConversationIdAndUserId(conversationId, targetId);
+        }
+    }
 
     public List<MemberResponse> getConversationMembers(Long conversationId) {
         Conversation conversation = conversationRepository.findById(conversationId)

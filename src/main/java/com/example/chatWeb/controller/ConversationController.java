@@ -2,6 +2,7 @@ package com.example.chatWeb.controller;
 
 import com.example.chatWeb.dto.request.AddGroupMembersRequest;
 import com.example.chatWeb.dto.request.CreateConversationRequest;
+import com.example.chatWeb.dto.request.RemoveMembersRequest;
 import com.example.chatWeb.dto.response.ApiResponse;
 import com.example.chatWeb.dto.response.ConversationResponse;
 import com.example.chatWeb.dto.response.MemberResponse;
@@ -43,6 +44,16 @@ public class ConversationController {
         conversationService.addMemberToConversation(id, request);
         return ApiResponse.<Void>builder()
                 .message("Member added successfully")
+                .build();
+    }
+
+    @DeleteMapping("{id}/members")
+    public ApiResponse<Void> removeMembers(@PathVariable Long id,
+                                           @RequestBody RemoveMembersRequest request) {
+        conversationService.removeMembersFromGroup(id, request);
+
+        return ApiResponse.<Void>builder()
+                .message("Member removed successfully")
                 .build();
     }
 }
