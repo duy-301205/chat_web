@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -25,5 +26,5 @@ public class MessageResponse {
     private String replyToContent;
     private Boolean isEdited;
     private Boolean isDeleted;
-
+    private List<AttachmentResponse> attachments;
 }

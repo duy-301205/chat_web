@@ -19,7 +19,7 @@ public class MessageController {
     private final MessageService messageService;
 
     @PostMapping
-    public ApiResponse<MessageResponse> sendMessage(MessageRequest message) {
+    public ApiResponse<MessageResponse> sendMessage(@RequestBody MessageRequest message) {
         return ApiResponse.<MessageResponse>builder()
                 .data(messageService.sendMessage(message))
                 .build();
