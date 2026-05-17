@@ -1,16 +1,15 @@
 package com.example.chatWeb.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class EditMessageRequest {
+public class SeenMessageRequest {
+    private Long conversationId;
     private Long messageId;
-    private String content;
 }

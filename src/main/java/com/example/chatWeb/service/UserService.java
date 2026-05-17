@@ -1,6 +1,8 @@
 package com.example.chatWeb.service;
 
+import com.example.chatWeb.dto.request.SearchUserRequest;
 import com.example.chatWeb.dto.response.MyProfileResponse;
+import com.example.chatWeb.dto.response.SearchUserResponse;
 import com.example.chatWeb.dto.response.UserResponse;
 import com.example.chatWeb.entity.User;
 import com.example.chatWeb.exception.AppException;
@@ -12,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,29 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserStatusService userStatusService;
+
+    public List<SearchUserResponse> searchUsers(SearchUserRequest request) {
+        User currentUser = getCurrentUser();
+
+        if (request.getKeyword() == null
+                        || request.getKeyword().trim().isEmpty()) {
+            return List.of();
+        }
+
+        return userRepository.searchUsers(
+                        request.getKeyword().trim(),
+                        currentUser.getId()
+                )
+                .stream()
+                .map(user -> SearchUserResponse.builder()
+                        .id(user.getId())
+                        .username(user.getActualUsername())
+                        .email(user.getEmail())
+                        .avatarUrl(user.getAvatarUrl())
+                        .status(userStatusService.getStatus(user.getId()))
+                        .build())
+                .toList();
+    }
 
     public MyProfileResponse getMyProfile() {
         User currentUser = getCurrentUser();

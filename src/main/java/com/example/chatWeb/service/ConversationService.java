@@ -16,6 +16,7 @@ import com.example.chatWeb.exception.AppException;
 import com.example.chatWeb.exception.ErrorCode;
 import com.example.chatWeb.repository.ConversationMemberRepository;
 import com.example.chatWeb.repository.ConversationRepository;
+import com.example.chatWeb.repository.MessageRepository;
 import com.example.chatWeb.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -31,11 +32,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ConversationService {
-    private final ConversationRepository conversationRepository;private final UserStatusService userStatusService;
+    private final ConversationRepository conversationRepository;
+    private final UserStatusService userStatusService;
     private final UserRepository userRepository;
     private final ConversationMemberRepository conversationMemberRepository;
     private final MemberService memberService;
     private final EntityManager entityManager;
+    private final MessageRepository messageRepository;
 
     @Transactional
     public void leaveGroup(Long conversationId) {
@@ -161,22 +164,37 @@ public class ConversationService {
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        if(ConvType.PRIVATE == request.getType()) {
-            Long parterId = request.getParticipantIds().get(0);
+        if (ConvType.PRIVATE == request.getType()) {
+            Long partnerId = request.getParticipantIds().get(0);
 
-            Optional<Conversation> existingConversation = conversationRepository.findPrivateChat(creatorId, parterId);
-            if(existingConversation.isPresent()) {
+            if (creatorId.equals(partnerId)) {
+                throw new AppException(ErrorCode.INVALID_REQUEST);
+            }
+
+            Long userA = Math.min(creatorId, partnerId);
+            Long userB = Math.max(creatorId, partnerId);
+            String privateKey = userA + "_" + userB;
+
+            Optional<Conversation> existingConversation =
+                    conversationRepository.findByPrivateKey(privateKey);
+
+            if (existingConversation.isPresent()) {
                 return mapToResponse(existingConversation.get(), creatorId);
             }
 
+            User partner = userRepository.findById(partnerId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
             Conversation conv = createEntity(ConvType.PRIVATE, null, null, creator);
+            conv.setPrivateKey(privateKey);
+
             Conversation saved = conversationRepository.save(conv);
 
             memberService.addMember(new AddMemberRequest(saved, creator, MemberRole.ADMIN));
+            memberService.addMember(new AddMemberRequest(saved, partner, MemberRole.MEMBER));
 
-            User parter = userRepository.findById(parterId)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-            memberService.addMember(new AddMemberRequest(saved, parter, MemberRole.MEMBER));
+            entityManager.flush();
+            entityManager.refresh(saved);
 
             return mapToResponse(saved, creatorId);
         }
@@ -214,7 +232,7 @@ public class ConversationService {
     }
 
     private ConversationResponse mapToResponse(Conversation conv, Long currentUserId) {
-        String dispalyName = conv.getName();
+        String displayName = conv.getName();
         String displayAvatar = conv.getAvatarUrl();
         Long parterId = null;
         boolean onlineStatus = false;
@@ -227,7 +245,7 @@ public class ConversationService {
                     .findFirst().orElse(null);
 
             if (parter != null) {
-                dispalyName = parter.getActualUsername();
+                displayName = parter.getActualUsername();
                 displayAvatar = parter.getAvatarUrl();
                 parterId = parter.getId();
 
@@ -239,16 +257,18 @@ public class ConversationService {
             }
         }
 
+        Long unreadCount = calculateUnreadCount(conv, currentUserId);
+
         ConversationResponse response = ConversationResponse.builder()
                 .id(conv.getId())
-                .name(dispalyName)
+                .name(displayName)
                 .avatarUrl(displayAvatar)
                 .type(conv.getType())
                 .partnerId(parterId)
                 .isOnline(onlineStatus)
                 .lastSeenAt(lastSeenAt)
                 .lastMessageAt(conv.getLastMessageAt())
-                .unreadCount(0L)
+                .unreadCount(unreadCount)
                 .build();
 
         if(conv.getLastMessage() != null) {
@@ -268,6 +288,32 @@ public class ConversationService {
         }
 
         return response;
+    }
+
+    private Long calculateUnreadCount(Conversation conversation, Long currentUserId) {
+        ConversationMember member = conversation.getMembers().stream()
+                .filter(m -> m.getUser().getId().equals(currentUserId))
+                .findFirst()
+                .orElse(null);
+
+        if (member == null) {
+            return 0L;
+        }
+
+        Message lastSeenMessage = member.getLastSeenMessage();
+
+        if (lastSeenMessage == null) {
+            return messageRepository.countUnreadWhenNoLastSeen(
+                    conversation.getId(),
+                    currentUserId
+            );
+        }
+
+        return messageRepository.countUnreadAfterLastSeen(
+                conversation.getId(),
+                lastSeenMessage.getId(),
+                currentUserId
+        );
     }
 
     private Long getCurrentUser() {

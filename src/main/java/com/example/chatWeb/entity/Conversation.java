@@ -32,6 +32,9 @@ public class Conversation extends BaseEntity {
 
     private String name;
 
+    @Column(name = "private_key", unique = true)
+    private String privateKey;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;

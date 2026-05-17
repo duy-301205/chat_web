@@ -24,6 +24,9 @@ public class Attachment {
     @Column(name = "file_url", nullable = false, columnDefinition = "TEXT")
     private String fileUrl;
 
+    @Column(name = "public_id", nullable = false)
+    private String publicId;
+
     @Column(name = "file_type", length = 50)
     private String fileType;
 

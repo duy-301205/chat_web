@@ -30,4 +30,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
             "AND m1.user.id = :id1 " +
             "AND m2.user.id = :id2")
     Optional<Conversation> findPrivateChat(@Param("id1") Long id1, @Param("id2") Long id2);
+
+    Optional<Conversation> findByPrivateKey(String privateKey);
 }
