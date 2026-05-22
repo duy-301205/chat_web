@@ -78,6 +78,7 @@ public class AuthService {
         userStatusService.updateStatus(user.getId(), "ONLINE");
 
         return LoginResponse.builder()
+                .userId(user.getId())
                 .accessToken(jwtService.generateAccessToken(user))
                 .refreshToken(jwtService.generateRefreshToken(user))
                 .build();
