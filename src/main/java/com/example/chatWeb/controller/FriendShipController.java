@@ -54,4 +54,12 @@ public class FriendShipController {
                 .build();
     }
 
+    @GetMapping("/requests/pending")
+    public ApiResponse<List<FriendResponse>> getPendingRequests() {
+        return ApiResponse.<List<FriendResponse>>builder()
+                .code(200)
+                .data(friendShipService.getMyPendingRequests())
+                .build();
+    }
+
 }

@@ -133,6 +133,20 @@ public class FriendShipService {
                 .toList();
     }
 
+    public List<FriendResponse> getMyPendingRequests() {
+        User currentUser = getCurrentUser();
+        List<User> penders = friendshipRepository.findPendingRequestsByUserId(currentUser.getId());
+
+        return penders.stream()
+                .map(u -> FriendResponse.builder()
+                        .id(u.getId())
+                        .username(u.getActualUsername())
+                        .avatarUrl(u.getAvatarUrl())
+                        .online(userStatusService.isUserOnline(u.getId()))
+                        .build())
+                .toList();
+    }
+
 
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

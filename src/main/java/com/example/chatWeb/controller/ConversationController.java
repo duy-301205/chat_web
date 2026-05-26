@@ -39,6 +39,14 @@ public class ConversationController {
                 .build();
     }
 
+    @PostMapping("/private/{targetUserId}")
+    public ApiResponse<Long> findOrCreatePrivateChat(@PathVariable Long targetUserId) {
+        Long conversationId = conversationService.findOrCreatePrivateConversation(targetUserId);
+        return ApiResponse.<Long>builder()
+                .data(conversationId)
+                .build();
+    }
+
     @PostMapping("/{id}/members")
     public ApiResponse<Void> addMember(@PathVariable Long id, @RequestBody AddGroupMembersRequest request) {
         conversationService.addMemberToConversation(id, request);

@@ -4,9 +4,11 @@ import com.example.chatWeb.dto.request.SearchUserRequest;
 import com.example.chatWeb.dto.response.MyProfileResponse;
 import com.example.chatWeb.dto.response.SearchUserResponse;
 import com.example.chatWeb.dto.response.UserResponse;
+import com.example.chatWeb.entity.Friendship;
 import com.example.chatWeb.entity.User;
 import com.example.chatWeb.exception.AppException;
 import com.example.chatWeb.exception.ErrorCode;
+import com.example.chatWeb.repository.FriendshipRepository;
 import com.example.chatWeb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserStatusService userStatusService;
+    private final FriendshipRepository friendshipRepository;
 
     public List<SearchUserResponse> searchUsers(SearchUserRequest request) {
         User currentUser = getCurrentUser();
@@ -31,18 +35,34 @@ public class UserService {
             return List.of();
         }
 
-        return userRepository.searchUsers(
-                        request.getKeyword().trim(),
-                        currentUser.getId()
-                )
-                .stream()
-                .map(user -> SearchUserResponse.builder()
-                        .id(user.getId())
-                        .username(user.getActualUsername())
-                        .email(user.getEmail())
-                        .avatarUrl(user.getAvatarUrl())
-                        .status(userStatusService.getStatus(user.getId()))
-                        .build())
+        List<User> matchedUsers = userRepository.searchUsers(
+                request.getKeyword().trim(),
+                currentUser.getId()
+        );
+
+        return matchedUsers.stream()
+                .map(user -> {
+                    Long id1 = Math.min(currentUser.getId(), user.getId());
+                    Long id2 = Math.max(currentUser.getId(), user.getId());
+
+                    Optional<Friendship> friendshipOpt =
+                            friendshipRepository.findBySubIds(id1, id2);
+
+                    String relationStatus = "NONE";
+
+                    if (friendshipOpt.isPresent()) {
+                        relationStatus = friendshipOpt.get().getStatus().name();
+                    }
+
+                    return SearchUserResponse.builder()
+                            .id(user.getId())
+                            .username(user.getActualUsername())
+                            .email(user.getEmail())
+                            .avatarUrl(user.getAvatarUrl())
+                            .status(userStatusService.getStatus(user.getId()))
+                            .relationStatus(relationStatus)
+                            .build();
+                })
                 .toList();
     }
 

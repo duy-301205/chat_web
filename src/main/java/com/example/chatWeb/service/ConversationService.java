@@ -106,6 +106,17 @@ public class ConversationService {
         }
     }
 
+    @Transactional
+    public Long findOrCreatePrivateConversation(Long targetUserId) {
+        CreateConversationRequest request = new CreateConversationRequest();
+        request.setType(ConvType.PRIVATE);
+        request.setParticipantIds(List.of(targetUserId));
+
+        ConversationResponse response = this.createConversation(request);
+
+        return response.getId();
+    }
+
     public List<MemberResponse> getConversationMembers(Long conversationId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
