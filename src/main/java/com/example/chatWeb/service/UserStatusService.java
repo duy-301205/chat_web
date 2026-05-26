@@ -16,7 +16,7 @@ public class UserStatusService {
     public void updateStatus(Long userId, String status) {
         String key = STATUS_PREFIX + userId;
         if("ONLINE".equalsIgnoreCase(status)) {
-            stringRedisTemplate.opsForValue().set(key, "ONLINE", Duration.ofMinutes(5));
+            stringRedisTemplate.opsForValue().set(key, "ONLINE", Duration.ofMinutes(10));
         } else {
             stringRedisTemplate.delete(key);
         }

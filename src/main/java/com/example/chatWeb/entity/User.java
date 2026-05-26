@@ -40,6 +40,12 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "last_seen")
     private OffsetDateTime lastSeen;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Friendship> sentFriendships;
+
+    @OneToMany(mappedBy = "friend", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Friendship> receivedFriendships;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
