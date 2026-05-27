@@ -124,6 +124,7 @@ public class ConversationService {
         return conversation.getMembers().stream()
                 .map(m -> MemberResponse.builder()
                         .id(m.getId())
+                        .userId(m.getUser().getId())
                         .username(m.getUser().getActualUsername())
                         .nickName(m.getNickname())
                         .avatarUrl(m.getUser().getAvatarUrl())

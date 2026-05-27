@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 @Builder
 public class MemberResponse {
     private Long id;
+    private Long userId;
     private String username;
     private String nickName;
     private String avatarUrl;
