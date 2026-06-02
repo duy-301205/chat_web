@@ -3,6 +3,10 @@ package com.example.chatWeb.service;
 import com.example.chatWeb.dto.request.*;
 import com.example.chatWeb.dto.response.MessageResponse;
 import com.example.chatWeb.dto.response.SeenMessageResponse;
+import com.example.chatWeb.entity.User;
+import com.example.chatWeb.exception.AppException;
+import com.example.chatWeb.exception.ErrorCode;
+import com.example.chatWeb.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -15,8 +19,9 @@ public class WebSocketChatService {
 
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;;
 
-    public void sendMessage(WebSocketMessageRequest request) {
+    public void sendMessage(WebSocketMessageRequest request,String email) {
 
         MessageRequest messageRequest = new MessageRequest();
 
@@ -25,19 +30,19 @@ public class WebSocketChatService {
         messageRequest.setType(request.getType());
         messageRequest.setReplyToId(request.getReplyToId());
 
-        MessageResponse response = messageService.sendMessage(messageRequest, List.of());
+        MessageResponse response = messageService.sendMessage(messageRequest,email, List.of());
 
         messagingTemplate.convertAndSend(
                 "/topic/conversations/" + request.getConversationId(),
                 response);
     }
 
-    public void seenMessage(WebSocketSeenRequest request) {
+    public void seenMessage(WebSocketSeenRequest request, String email) {
         SeenMessageRequest seenMessageRequest = new SeenMessageRequest();
         seenMessageRequest.setConversationId(request.getConversationId());
         seenMessageRequest.setMessageId(request.getMessageId());
 
-        SeenMessageResponse response = messageService.seenMessage(seenMessageRequest);
+        SeenMessageResponse response = messageService.seenMessage(seenMessageRequest, email);
 
         messagingTemplate.convertAndSend(
                 "/topic/conversations/" + request.getConversationId() + "/seen",
@@ -45,12 +50,12 @@ public class WebSocketChatService {
         );
     }
 
-    public void editMessage(WebSocketEditMessageRequest request) {
+    public void editMessage(WebSocketEditMessageRequest request, String email) {
         EditMessageRequest editMessageRequest = new EditMessageRequest();
         editMessageRequest.setMessageId(request.getMessageId());
         editMessageRequest.setContent(request.getContent());
 
-        MessageResponse response = messageService.editMessage(editMessageRequest);
+        MessageResponse response = messageService.editMessage(editMessageRequest, email);
 
         messagingTemplate.convertAndSend(
                 "/topic/conversations/" + request.getConversationId(),
@@ -58,11 +63,25 @@ public class WebSocketChatService {
         );
     }
 
-    public void recallMessage(WebSocketRecallRequest request) {
-        messageService.recallMessage(request.getMessageId());
+    public void recallMessage(WebSocketRecallRequest request, String email) {
+        messageService.recallMessage(request.getMessageId(), email);
 
         messagingTemplate.convertAndSend(
                 "/topic/conversations/" + request.getConversationId(),
+                request
+        );
+    }
+
+    public void handleTypingStatus(WebSocketTypingRequest request, String email) {
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        request.setUserId(currentUser.getId());
+        request.setUsername(currentUser.getActualUsername());
+
+        messagingTemplate.convertAndSend(
+                "/topic/conversations/" + request.getConversationId() + "/typing",
                 request
         );
     }

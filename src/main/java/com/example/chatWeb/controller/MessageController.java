@@ -15,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
@@ -38,8 +40,9 @@ public class MessageController {
         try {
             MessageRequest message = objectMapper.readValue(data, MessageRequest.class);
 
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
             return ApiResponse.<MessageResponse>builder()
-                    .data(messageService.sendMessage(message, files))
+                    .data(messageService.sendMessage(message,email, files))
                     .build();
 
         } catch (Exception e) {
@@ -57,7 +60,8 @@ public class MessageController {
 
     @PostMapping("/{messageId}/recall")
     public ApiResponse<Void> recallMessage(@PathVariable Long messageId) {
-        messageService.recallMessage(messageId);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        messageService.recallMessage(messageId, email);
         return ApiResponse.<Void>builder()
                 .message("Tin nhắn đã được thu hồi")
                 .build();
@@ -65,16 +69,18 @@ public class MessageController {
 
     @PutMapping("/edit")
     public ApiResponse<MessageResponse> editMessage(@RequestBody EditMessageRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ApiResponse.<MessageResponse>builder()
-                .data(messageService.editMessage(request))
+                .data(messageService.editMessage(request, email))
                 .build();
     }
 
     @PutMapping("/seen")
     public ApiResponse<SeenMessageResponse> seenMessage(@RequestBody SeenMessageRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return ApiResponse.<SeenMessageResponse>builder()
                 .message("Seen message successfully")
-                .data(messageService.seenMessage(request))
+                .data(messageService.seenMessage(request, email))
                 .build();
     }
 }

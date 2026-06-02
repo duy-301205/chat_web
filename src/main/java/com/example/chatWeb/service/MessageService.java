@@ -40,8 +40,11 @@ public class MessageService {
     private final ConversationMemberRepository conversationMemberRepository;
 
     @Transactional
-    public MessageResponse sendMessage(MessageRequest request, List<MultipartFile> files) {
-        Long currentId = getCurrentUser();
+    public MessageResponse sendMessage(MessageRequest request,String email, List<MultipartFile> files) {
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Long currentId = currentUser.getId();
 
         Conversation conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
@@ -56,10 +59,12 @@ public class MessageService {
         message.setContent(request.getContent());
         message.setType(request.getType() != null ? request.getType() : MsgType.TEXT);
 
+        // Xử lý phản hồi tin nhắn cũ (Reply)
         if(request.getReplyToId() != null) {
             message.setReplyTo(messageRepository.getReferenceById(request.getReplyToId()));
         }
 
+        // Xử lý đính kèm File / Hình ảnh qua Cloudinary
         if(files != null && !files.isEmpty()) {
             List<Attachment> attachments = new ArrayList<>();
 
@@ -111,8 +116,11 @@ public class MessageService {
     }
 
     @Transactional
-    public void recallMessage(Long messageId) {
-        Long currentId = getCurrentUser();
+    public void recallMessage(Long messageId, String email) {
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Long currentId = currentUser.getId();
 
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new AppException(ErrorCode.MESSAGE_NOT_FOUND));
@@ -121,7 +129,7 @@ public class MessageService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        if (message.getIsDeleted()) {
+        if (message.getIsDeleted() != null && message.getIsDeleted()) {
             return;
         }
 
@@ -144,8 +152,11 @@ public class MessageService {
     }
 
     @Transactional
-    public MessageResponse editMessage(EditMessageRequest request) {
-        Long currentId = getCurrentUser();
+    public MessageResponse editMessage(EditMessageRequest request, String email) {
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Long currentId = currentUser.getId();
 
         Message message = messageRepository.findById(request.getMessageId())
                 .orElseThrow(() -> new AppException(ErrorCode.MESSAGE_NOT_FOUND));
@@ -173,10 +184,8 @@ public class MessageService {
 
         Conversation conversation = savedMessage.getConversation();
 
-        if (
-                conversation.getLastMessage() != null
-                        && conversation.getLastMessage().getId().equals(savedMessage.getId())
-        ) {
+        if (conversation.getLastMessage() != null
+                && conversation.getLastMessage().getId().equals(savedMessage.getId())) {
             conversation.setLastMessage(savedMessage);
             conversationRepository.save(conversation);
         }
@@ -185,8 +194,11 @@ public class MessageService {
     }
 
     @Transactional
-    public SeenMessageResponse seenMessage(SeenMessageRequest request) {
-        Long currentId = getCurrentUser();
+    public SeenMessageResponse seenMessage(SeenMessageRequest request, String email) {
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Long currentId = currentUser.getId();
 
         Conversation conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
