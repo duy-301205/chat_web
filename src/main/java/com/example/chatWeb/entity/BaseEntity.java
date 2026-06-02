@@ -2,16 +2,18 @@ package com.example.chatWeb.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 
-@MappedSuperclass
 @Getter
 @Setter
+@lombok.experimental.SuperBuilder
+@MappedSuperclass
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class BaseEntity {
 
     @CreationTimestamp

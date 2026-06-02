@@ -1,9 +1,6 @@
 package com.example.chatWeb.service;
 
-import com.example.chatWeb.dto.request.MessageRequest;
-import com.example.chatWeb.dto.request.SeenMessageRequest;
-import com.example.chatWeb.dto.request.WebSocketMessageRequest;
-import com.example.chatWeb.dto.request.WebSocketSeenRequest;
+import com.example.chatWeb.dto.request.*;
 import com.example.chatWeb.dto.response.MessageResponse;
 import com.example.chatWeb.dto.response.SeenMessageResponse;
 import lombok.RequiredArgsConstructor;
@@ -47,4 +44,26 @@ public class WebSocketChatService {
                 response
         );
     }
-}
+
+    public void editMessage(WebSocketEditMessageRequest request) {
+        EditMessageRequest editMessageRequest = new EditMessageRequest();
+        editMessageRequest.setMessageId(request.getMessageId());
+        editMessageRequest.setContent(request.getContent());
+
+        MessageResponse response = messageService.editMessage(editMessageRequest);
+
+        messagingTemplate.convertAndSend(
+                "/topic/conversations/" + request.getConversationId(),
+                response
+        );
+    }
+
+    public void recallMessage(WebSocketRecallRequest request) {
+        messageService.recallMessage(request.getMessageId());
+
+        messagingTemplate.convertAndSend(
+                "/topic/conversations/" + request.getConversationId(),
+                request
+        );
+    }
+ }

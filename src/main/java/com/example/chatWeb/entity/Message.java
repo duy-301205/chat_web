@@ -2,10 +2,7 @@ package com.example.chatWeb.entity;
 
 import com.example.chatWeb.enums.MsgType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
@@ -18,6 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@lombok.experimental.SuperBuilder
 public class Message extends BaseEntity {
 
     @Id

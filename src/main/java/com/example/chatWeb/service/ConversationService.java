@@ -12,6 +12,7 @@ import com.example.chatWeb.entity.Message;
 import com.example.chatWeb.entity.User;
 import com.example.chatWeb.enums.ConvType;
 import com.example.chatWeb.enums.MemberRole;
+import com.example.chatWeb.enums.MsgType;
 import com.example.chatWeb.exception.AppException;
 import com.example.chatWeb.exception.ErrorCode;
 import com.example.chatWeb.repository.ConversationMemberRepository;
@@ -54,12 +55,26 @@ public class ConversationService {
         ConversationMember me = conversationMemberRepository.findByConversationIdAndUserId(conversationId, currentId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_IN_CONVERSATION));
 
+        User leaver = me.getUser();
+        String leaverUsername = leaver.getActualUsername();
+
         if(me.getRole() == MemberRole.ADMIN) {
             handleAdminLeave(conversation, currentId);
         }
         conversationMemberRepository.delete(me);
 
         conversation.getMembers().removeIf(m -> m.getUser().getId().equals(currentId));
+
+        Message leaveNotice = Message.builder()
+                .conversation(conversation)
+                .sender(leaver)
+                .content(leaverUsername + " đã rời khỏi nhóm trò chuyện.")
+                .type(MsgType.SYSTEM)
+                .isDeleted(false)
+                .isEdited(false)
+                .createdAt(OffsetDateTime.now())
+                .build();
+        messageRepository.save(leaveNotice);
     }
 
     private void handleAdminLeave(Conversation conversation, Long adminId) {
