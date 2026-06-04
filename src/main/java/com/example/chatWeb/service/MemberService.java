@@ -1,7 +1,10 @@
 package com.example.chatWeb.service;
 
 import com.example.chatWeb.dto.request.AddMemberRequest;
+import com.example.chatWeb.dto.request.UpdateNicknameRequest;
 import com.example.chatWeb.entity.ConversationMember;
+import com.example.chatWeb.exception.AppException;
+import com.example.chatWeb.exception.ErrorCode;
 import com.example.chatWeb.repository.ConversationMemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +31,19 @@ public class MemberService {
         member.setUpdatedAt(OffsetDateTime.now());
 
         memberRepository.save(member);
+    }
+
+    @Transactional
+    public void updateNickname(UpdateNicknameRequest request) {
+        ConversationMember member = memberRepository.findByConversationIdAndUserId(request.getConversationId(), request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_IN_CONVERSATION));
+
+        if(request.getNickname() == null || request.getNickname().trim().isEmpty()) {
+            member.setNickname(member.getUser().getActualUsername());
+        } else {
+            member.setNickname(request.getNickname().trim());
+        }
+
+        member.setUpdatedAt(OffsetDateTime.now());
     }
 }

@@ -3,10 +3,12 @@ package com.example.chatWeb.controller;
 import com.example.chatWeb.dto.request.AddGroupMembersRequest;
 import com.example.chatWeb.dto.request.CreateConversationRequest;
 import com.example.chatWeb.dto.request.RemoveMembersRequest;
+import com.example.chatWeb.dto.request.UpdateNicknameRequest;
 import com.example.chatWeb.dto.response.ApiResponse;
 import com.example.chatWeb.dto.response.ConversationResponse;
 import com.example.chatWeb.dto.response.MemberResponse;
 import com.example.chatWeb.service.ConversationService;
+import com.example.chatWeb.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,7 @@ import java.util.List;
 public class ConversationController {
 
     private final ConversationService conversationService;
+    private final MemberService memberService;
 
     @GetMapping
     public ApiResponse<List<ConversationResponse>> getMyConversations(){
@@ -69,6 +72,14 @@ public class ConversationController {
         conversationService.leaveGroup(id);
         return ApiResponse.<Void>builder()
                 .message("You left the conversation")
+                .build();
+    }
+
+    @PutMapping("/member/nickname")
+    public ApiResponse<Void> updateNickname(@RequestBody UpdateNicknameRequest request) {
+        memberService.updateNickname(request);
+        return ApiResponse.<Void>builder()
+                .message("Thay đổi biệt danh thành công!")
                 .build();
     }
 }

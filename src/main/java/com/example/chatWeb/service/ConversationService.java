@@ -266,13 +266,12 @@ public class ConversationService {
         OffsetDateTime lastSeenAt = null;
 
         if (conv.getType() == ConvType.PRIVATE) {
-            User parter = conv.getMembers().stream()
+            ConversationMember parterMember = conv.getMembers().stream()
                     .filter(m -> !m.getUser().getId().equals(currentUserId))
-                    .map(ConversationMember::getUser)
                     .findFirst().orElse(null);
 
-            if (parter != null) {
-                displayName = parter.getActualUsername();
+            if (parterMember != null) {
+                User parter = parterMember.getUser();
                 displayAvatar = parter.getAvatarUrl();
                 parterId = parter.getId();
 
@@ -280,6 +279,12 @@ public class ConversationService {
 
                 if(!onlineStatus) {
                     lastSeenAt = parter.getLastSeen();
+                }
+
+                if (parterMember.getNickname() != null && !parterMember.getNickname().trim().isEmpty()) {
+                    displayName = parterMember.getNickname();
+                } else {
+                    displayName = parter.getActualUsername();
                 }
             }
         }
@@ -306,7 +311,14 @@ public class ConversationService {
             if(lastMessage.getSender().getId().equals(currentUserId)) {
                 response.setLastMessageSenderName("You");
             } else {
-                response.setLastMessageSenderName(lastMessage.getSender().getUsername());
+                Long senderId = lastMessage.getSender().getId();
+                String senderName = conv.getMembers().stream()
+                        .filter(m -> m.getUser().getId().equals(senderId))
+                                .map(ConversationMember::getNickname)
+                                        .filter(nickname -> nickname != null && !nickname.trim().isEmpty())
+                                                .findFirst()
+                                                        .orElse(lastMessage.getSender().getActualUsername());
+                response.setLastMessageSenderName(senderName);
             }
         }
 
