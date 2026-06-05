@@ -46,7 +46,7 @@ public class WebSocketChatService {
 
                     messagingTemplate.convertAndSend(destination, response);
                 }
-                
+
             }
         } catch (Exception e) {
             System.err.println("Lỗi luồng đẩy tin nhắn lên Sidebar: " + e.getMessage());

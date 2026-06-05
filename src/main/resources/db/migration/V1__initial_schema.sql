@@ -103,6 +103,7 @@ CREATE TABLE invalidated_tokens (
                                     expiry_time TIMESTAMP WITH TIME ZONE NOT NULL,
                                     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE INDEX idx_msgs_conv_id_id_desc ON messages (conversation_id, id DESC);
 CREATE INDEX idx_msgs_not_deleted ON messages (conversation_id, id DESC) WHERE is_deleted = FALSE;
@@ -112,3 +113,8 @@ CREATE INDEX idx_attach_msg ON attachments(message_id);
 
 CREATE INDEX idx_friendships_lookup ON friendships (user_id, friend_id, status);
 CREATE INDEX idx_friendships_reverse_lookup ON friendships (friend_id, status);
+
+CREATE INDEX idx_messages_content_trgm ON messages USING gin (content gin_trgm_ops);
+CREATE INDEX idx_messages_unread_counter ON messages (conversation_id, id, sender_id);
+CREATE INDEX idx_users_username_trgmc ON users USING gin (username gin_trgm_ops);
+CREATE INDEX idx_users_email ON users (email);
