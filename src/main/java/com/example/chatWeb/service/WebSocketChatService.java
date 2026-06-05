@@ -19,7 +19,8 @@ public class WebSocketChatService {
 
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final UserRepository userRepository;;
+    private final UserRepository userRepository;
+    private final ConversationService conversationService;
 
     public void sendMessage(WebSocketMessageRequest request,String email) {
 
@@ -35,6 +36,21 @@ public class WebSocketChatService {
         messagingTemplate.convertAndSend(
                 "/topic/conversations/" + request.getConversationId(),
                 response);
+
+        try {
+            List<Long> memberIds = conversationService.getMemberUserIdsByConversationId(request.getConversationId());
+
+            if(memberIds != null) {
+                for(Long userId : memberIds) {
+                    String destination = "/topic/user/" + userId + "/sidebar";
+
+                    messagingTemplate.convertAndSend(destination, response);
+                }
+                
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi luồng đẩy tin nhắn lên Sidebar: " + e.getMessage());
+        }
     }
 
     public void seenMessage(WebSocketSeenRequest request, String email) {

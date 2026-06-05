@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
     // Lấy tin nhắn theo conversationId, sắp xếp theo thời gian giảm dần
@@ -45,5 +47,9 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     Long countUnreadWhenNoLastSeen(
             @Param("conversationId") Long conversationId,
             @Param("userId") Long userId
+    );
+
+    List<Message> findByConversationIdAndContentContainingIgnoreCaseAndIsDeletedFalseOrderByCreatedAtDesc(
+            Long conversationId, String content
     );
 }

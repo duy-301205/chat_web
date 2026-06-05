@@ -112,7 +112,7 @@ public class UserService {
         return MyProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .username(user.getUsername())
+                .username(user.getActualUsername())
                 .status(status)
                 .avatarUrl(user.getAvatarUrl())
                 .lastSeen(user.getLastSeen())

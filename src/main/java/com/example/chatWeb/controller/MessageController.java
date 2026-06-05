@@ -2,6 +2,7 @@ package com.example.chatWeb.controller;
 
 import com.example.chatWeb.dto.request.EditMessageRequest;
 import com.example.chatWeb.dto.request.MessageRequest;
+import com.example.chatWeb.dto.request.SearchMessagesRequest;
 import com.example.chatWeb.dto.request.SeenMessageRequest;
 import com.example.chatWeb.dto.response.ApiResponse;
 import com.example.chatWeb.dto.response.MessageResponse;
@@ -81,6 +82,13 @@ public class MessageController {
         return ApiResponse.<SeenMessageResponse>builder()
                 .message("Seen message successfully")
                 .data(messageService.seenMessage(request, email))
+                .build();
+    }
+
+    @GetMapping("/searchMessage")
+    public ApiResponse<List<MessageResponse>> searchMessages(@ModelAttribute SearchMessagesRequest request) {
+        return ApiResponse.<List<MessageResponse>>builder()
+                .data(messageService.searchMessages(request))
                 .build();
     }
 }

@@ -354,6 +354,15 @@ public class ConversationService {
                 currentUserId
         );
     }
+    
+    public List<Long> getMemberUserIdsByConversationId(Long conversationId) {
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+        return conversation.getMembers().stream()
+                .map(m -> m.getUser().getId())
+                .toList();
+    }
 
     private Long getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

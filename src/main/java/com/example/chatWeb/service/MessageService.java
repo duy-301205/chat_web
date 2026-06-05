@@ -2,6 +2,7 @@ package com.example.chatWeb.service;
 
 import com.example.chatWeb.dto.request.EditMessageRequest;
 import com.example.chatWeb.dto.request.MessageRequest;
+import com.example.chatWeb.dto.request.SearchMessagesRequest;
 import com.example.chatWeb.dto.request.SeenMessageRequest;
 import com.example.chatWeb.dto.response.AttachmentResponse;
 import com.example.chatWeb.dto.response.MessageResponse;
@@ -231,6 +232,27 @@ public class MessageService {
                 .userId(currentId)
                 .seenAt(OffsetDateTime.now())
                 .build();
+    }
+
+    public List<MessageResponse> searchMessages(SearchMessagesRequest request) {
+        Long currentUserId = getCurrentUser();
+
+        Conversation conversation = conversationRepository.findById(request.getConversationId())
+                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+        if(!conversationService.isMember(conversation, currentUserId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if(request.getKeyword() == null || request.getKeyword().trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return messageRepository.findByConversationIdAndContentContainingIgnoreCaseAndIsDeletedFalseOrderByCreatedAtDesc(
+                request.getConversationId(), request.getKeyword()
+        )
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     private MessageResponse mapToResponse(Message message) {
