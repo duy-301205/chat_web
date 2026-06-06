@@ -41,7 +41,7 @@ spring:
       password: ${REDIS_PASSWORD}
       timeout: 60s
       ssl:
-        bundle: ""
+        enabled: true
       properties:
         ssl: true
       lettuce:
