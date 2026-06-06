@@ -19,7 +19,7 @@ public class CorsConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "chat-web-ui-rho.vercel.app"
+                "https://chat-web-ui-rho.vercel.app"
         ));
 
         config.setAllowedHeaders(List.of("*"));
