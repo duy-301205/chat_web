@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Cho phép truy cập các API liên quan đến Auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/ws/**", "/api/health").permitAll()
                         // Cho phép truy cập WebSocket
                         .requestMatchers("/ws/**").permitAll()
                         // Các request còn lại phải xác thực
